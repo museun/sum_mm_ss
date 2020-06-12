@@ -1,24 +1,19 @@
 fn main() {
     println!("Enter `mm:ss` lines. Ctrl-Z to finish");
 
-    let mut total = 0;
     use std::io::BufRead as _;
-    let sum = std::io::stdin()
+    let (total, sum) = std::io::stdin()
         .lock()
         .lines()
         .flatten()
         .flat_map(|s| {
-            let s = s.trim();
-            if s.is_empty() {
-                return None;
-            }
-
-            let mut t = s.split(':').flat_map(|s| s.parse::<u64>().ok());
-            let (mins, secs) = (t.next()?, t.next()?);
-            total += 1;
-            Some(secs + (mins * 60))
+            Some(s.trim()).filter(|s| !s.is_empty()).and_then(|s| {
+                let mut t = s.split(':').flat_map(|s| s.parse::<u64>().ok());
+                let (mins, secs) = (t.next()?, t.next()?);
+                Some(secs + (mins * 60))
+            })
         })
-        .sum::<u64>();
+        .fold((0, 0), |(total, sum), c| (total + 1, sum + c));
 
     println!("\ntotal entries: {}", total);
 
